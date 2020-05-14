@@ -1,0 +1,151 @@
+---
+title: 'Exercise: Vectors and matrices in R'
+author: "Jakob Liebmann"
+date: "14.05.2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    df_: paged
+    code_folding: show  
+    theme: united
+    highlight: tango
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Creating vectors
+
+Vector a from -10 to +10 in steps of 1
+```{r}
+a <- seq(from = -10, to = 10, by = 1)
+a
+```
+
+Vector b from -1 to +1 in steps of 0.1
+```{r}
+b <- seq(from = -1, to = 1, by = 0.1)
+b
+```
+
+Vector c with 21 random numbers from the standard normal distribution
+```{r}
+c <- rnorm(n = 21)
+c
+```
+
+# Creating Matrices
+
+Matrix D of dimensions 3 x 4 with random numbers
+```{r}
+D <- matrix(data = runif(3*4), nrow = 3, ncol = 4)
+D
+```
+
+Matrix E of dimensions 21 x 3: by binding the 3 vectors from above column-wise. Verify the dimensions of E via dim.
+
+```{r}
+E <- matrix(data = c(a,b,c), nrow = 21, ncol = 3)
+dim(E)
+E
+```
+
+Matrix F of dimensions 3 x 21: by binding the 3 vectors from above row-wise. Again verify the dimensions of F.
+```{r}
+F <- matrix(data = c(a,b,c), nrow = 3, ncol = 21, byrow = TRUE)
+dim(F)
+F
+```
+
+# Data frame to matrix
+
+Turn the built-in datasets mtcars and iris into matrices. Verify that these are matrices via class.
+Then check how the two are internally stored via typeof. Make sure that you obtain two numeric
+matrices by converting character of factor variables into a set of dummies.
+```{r}
+# dataset mtcars
+matrix_mtcars <- as.matrix(x = mtcars)
+class(matrix_mtcars)
+typeof(matrix_mtcars)
+matrix_mtcars
+
+# dataset iris
+matrix_iris <- fastDummies::dummy_cols(iris, select_columns = "Species", remove_selected_columns = TRUE)
+matrix_iris <- as.matrix(matrix_iris)
+class(matrix_iris)
+typeof(matrix_iris)
+head(x = matrix_iris, n = 10)
+```
+
+In the previous exercise you have recoded a variable as a set of dummies. However, there are situations
+where a differen type of numeric recoding is possible. Load the built-in datasets esoph and study the
+data via View() and ?esoph. Check the class of the variables. Which alternative way of recoding
+agegp and alcgp could you use?.
+
+```{r}
+esoph
+class(esoph$agegp)
+unclass(esoph$agegp)
+levels(esoph$agegp) <- c(1,2,3,4,5,6)
+esoph$agegp <- as.vector.factor(esoph$agegp)
+esoph$agegp <- as.numeric(esoph$agegp)
+
+class(esoph$alcgp)
+unclass(esoph$alcgp)
+levels(esoph$alcgp) <- c(1,2,3,4)
+esoph$alcgp <- as.vector.factor(esoph$alcgp)
+esoph$alcgp <- as.numeric(esoph$alcgp)
+
+class(esoph$tobgp)
+unclass(esoph$tobgp) 
+levels(esoph$tobgp) <- c(1,2,3,4)
+esoph$tobgp <- as.vector.factor(esoph$tobgp)
+esoph$tobgp <- as.numeric(esoph$tobgp)
+
+esoph <- as.matrix(esoph)
+class(esoph)
+typeof(esoph)
+```
+
+# Operators
+
+Consider the vectors a = (1,2,3), b = (4,5,6), and c = (1,2,. . . ,10).
+```{r}
+a <- 1:3
+b <- 4:6
+c <- 1:10
+```
+
+Calculate a + b and b + a to verify whether vectors are commutative.
+```{r}
+a+b
+b+a  #they are commutative
+```
+
+Calculate a * b and a %*% b. What is the difference between the two operators? Which operation represents the dot product of a and b?
+```{r}
+a*b
+a %*% b  #represents the dot-product
+```
+
+Verify whether the dot product a · b is equal to b · a.
+```{r}
+b %*% a  #equal dot product
+```
+
+Calculate a + c. What happens here? Is this in lign with linear algebra rules?
+```{r}
+a+c[1:9]  #shortened the vector to avoid an error
+```
+R sums vectors of different lengths by iteratively reusing the elements of the shorter vector. The longer vector must be many times longer than the shorter one. The result makes no mathematical sense. 
+
+
+Calculate a * c and a %*% c. What happens here? What is the difference between the two approaches?
+```{r}
+a*c[1:9]    #shortened the vector to avoid an error
+a %*% t(c)  #transposed the vector c to avoid an error
+```
+A 3x10 matrix descripes the outer product.
