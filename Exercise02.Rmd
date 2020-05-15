@@ -1,0 +1,123 @@
+---
+title: 'Exercise: Linear algebra'
+author: "Jakob Liebmann"
+date: "15.05.2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    df_: paged
+    code_folding: show  
+    theme: united
+    highlight: tango
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exercise 1
+
+Consider the following three vectors 
+- a = (−0.5276,−0.8453,−0.0839) 
+- b = (−0.6050, 0.4433,−0.6614) 
+- c = (−0.5963, 0.2981, 0.7454)
+```{r}
+a <- c(−0.5276,−0.8453,−0.0839)
+b <- c(−0.6050, 0.4433,−0.6614)
+c <- c(−0.5963, 0.2981, 0.7454)
+```
+
+
+Calculate the Euclidean length of a, b, and c. 
+```{r}
+# writing a function doing the job
+length_vector <- function(vector){
+  square <- 0
+  for (i in vector){
+    square <- square + (i*i)
+  }
+  length_vec = sqrt(square)
+  return(length_vec)
+}
+
+length_vector(a)
+length_vector(b)
+length_vector(c)
+```
+
+
+Then calculate the dot products a · b, a · c, and b · c.
+```{r}
+a %*% b
+a %*% c
+b %*% c
+```
+
+
+What is the name for such vectors?
+
+Because they are unit vectors (length = 1) and orthogonal vectors (dot product = 0) at the same time, these vectors are called orthonormal.
+
+# Exercise 2
+
+Consider the following two vectors: 
+u = (0.5, 0.4, 0.4, 0.5, 0.1, 0.4, 0.1) and 
+v = (−1,−2, 1,−2, 3, 1,−5).
+```{r}
+u <- c(0.5, 0.4, 0.4, 0.5, 0.1, 0.4, 0.1)
+v <- c(−1,−2, 1,−2, 3, 1,−5)
+```
+
+
+• Calculate the Euclidean length of vectors u using the dot product notation. How do you call a vector of this length?
+```{r}
+u %*% v
+```
+
+
+• Calculate the Euclidean length of vector v. Then create v_normalized by dividing each element of v by the length of v. Then check the length of v_normalized.
+```{r}
+length_vector(v)
+v_normalized <- v/length_vector(v)
+length_vector(v_normalized)
+```
+
+
+• Calculate the outer product of u and v, an their dot product. What is the geometric interpration of the dot product?
+```{r}
+# outer product
+u %*% t(v)
+
+# inner (dot) product
+u %*% v
+```
+The inner/dot product describes how often vector a fits in the projection of vector b on vector a.
+
+
+• Calculate the angle between u and v using the fact that u · v = ||u|| ||v|| cos(theta). 
+(Hint: the base R function acos does not return “degrees”, but “radians”. You can convert radians to degrees by multiplying with 180/pi. As an alternative you can use the function aspace::acos_d).
+```{r}
+theta = acos((u %*% v) / (length_vector(u) * length_vector(v)))
+(theta <- theta * 180 / pi)
+```
+
+
+# Exercise 3
+A shop sells apples, cherries, and bananas for a price of 1€, 3€, and 2€ respectively per kilogram. The following table (see pdf-file) shows the amounts (in kg) of apples, cherries, and bananas sold in the course of a week.
+
+• Turn the table into a matrix and use matrix-vector multiplication to calculate the value of total sales per day.
+```{r}
+(shop <-matrix(c(5,4,3,6,10,1,2,2,4,5,4,4,3,6,3), nrow = 3, ncol = 5, byrow = TRUE))
+(prices <- c(1,3,2))
+prices %*% shop
+```
+
+• What characterises linear dependence of vectors? Do you see linear dependent columns?
+
+Linear dependence of column-vectors descripes redundant information within one column. I don't see this case.
+
+• Is the following statement true: This matrix can have at most three linearly independent columns.
+
+Thats true, the number of dimensions is limitting the maximum amount of independent vectors.
