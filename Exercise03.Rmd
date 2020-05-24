@@ -1,0 +1,78 @@
+---
+title: 'Exercise: Distances'
+author: "Jakob Liebmann"
+date: "24.05.2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    df_: paged
+    code_folding: show  
+    theme: united
+    highlight: tango
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=FALSE}
+movies <- data.frame(Matrix = c(5,1,3), 
+                     Titanic = c(4,0,5), 
+                     "Rush Hour" = c(3,-1,4), 
+                     "Dirty Dancing" = c(2,-2,5), 
+                     row.names = c("Mia","Joe","Lin"))
+documents <- data.frame(Corona = c(4,1,40), 
+                        Trump = c(2,2,20), 
+                        Economy = c(1,5,10), 
+                        China = c(3,0,30), 
+                        row.names = c("Document1", "Document2", "Document3"))
+songs <- data.frame(valence = c(0.14,0.57,0.33), 
+                    danceability = c(0.50, 0.55, 0.51), 
+                    energy = c(0.44,0.68,0.73), 
+                    "duration(ms)"=c(406040,217040,200040), 
+                    row.names = c("Earth Song", "80 Millionen", "Binding Lights"))
+movies
+documents
+songs
+```
+
+# Exercise 1
+**Which of the three datasets should be standardized before we measure pairwise distances between rows of the data?**  
+The dataset nr 3 "Song features" should be standardized, in order to eliminate the huge column-wise disproportion caused by the column "duration (ms)".
+
+**What would be the problem if we don’t standardize?**  
+The dimension "duration (ms)" would be the only one influencing the Minkowski distance. Cosin and correlation distance would approach zero.
+
+**How are z-scores defined? Do we have to apply the function along the rows or along the columns of our data set?**  
+The z-score of a date describes the ratio of its value to the mean value of the entire data group. a z-score of 0 means that the date is exactly on the mean value. a z-score of +1 (-1) means that the date deviates from the mean value by + (-) 1 standard deviation. In the case of z-score transformation, all data is stored in the appropriate format. It is assumed that the data is standard-normally distributed. In our case we must apply the transformation columnwise.
+
+# Exercise 2
+**Study the contents of the three tables and argue conceptionally, which measure might be the most suitable one to measure the distances between rows of the data. If there are several good candidates, then describe which type of question one can address with each of them.**  
+*Table 1:* To get a general assessment of the acceptance of our film selection, the euclidean distance is recommended. To compare the preference order of the three candidates, the measure of the correlation-based distance is recommended.  
+*Table 2:* Here the cosine distance is recommended. It allows you to compare the focus of the individual documents regardless of their size.  
+*Table 3:* First we have to standardize the table. Then, to create clusters it may be advisable to consider both cosine and correlation-based distance. Thus, depending on the algorithm, scaling and shifting effects could be partially neutralized.
+
+**Calculate the Euclidean distances, the cosine distances and the correlation-based distances for at least one of the data sets. You can either use functions such as stats::dist, factoextra::get_dist, and lsa::cosine (see distances-applied.R) or the distances function (see distances-from-scratch.R). Analyse the differences between the results of the three distance measures. Are your findings in line with your expectations (from the previous question)?**  
+```{r}
+# euclidean distance
+dist(documents, method = "euclidean")
+
+# cosine distance
+1 - lsa::cosine(t(as.matrix(documents)))
+
+# correlation-based distance
+factoextra::get_dist(documents, method = "pearson")
+```
+
+It can be seen that the euclidean distance has a limited informative value here. The results of the correlation-based distance measurement suggest that the focus of documents 1 and 3 is in agreement.  However, only the cosine distance confirms the identical center of gravity of documents 1 and 3, since the results would be influenced by shifting effects.  
+
+**Calculate the distances between the four movies Matrix, Titanic, Rush Hour, and Dirty Dancing using your preferred distance measure.**  
+```{r}
+# using correlation-based distance
+factoextra::get_dist(movies, method = "pearson")
+```
+
+It is shown that Joe and Mia have the same order of preference.
