@@ -1,0 +1,90 @@
+---
+title: 'Exercise: Clustering'
+author: "Jakob Liebmann"
+date: "09.06.2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    df_: paged
+    code_folding: show  
+    theme: united
+    highlight: tango
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# getting libs
+library(tidyverse)
+library(skimr)
+
+```
+
+# Setup
+```{r warning=FALSE}
+# getting data
+spotify <- read_csv("spotify.csv", col_types = cols(duration_ms = col_skip()))  %>%
+  mutate(track = paste(artist, track, sep = " - "),
+         artist = NULL)
+
+# mutate data into numeric df
+rownames(spotify) <- spotify$track
+spotify <- spotify %>%
+  select(-track)
+
+# inspect data
+spotify %>% skim()
+
+# standardize data
+spotify_matrix <- spotify %>% scale()
+
+# inspect data again
+spotify_matrix %>% skim()
+```
+
+
+
+# Optimal k
+```{r}
+# testing different amounts of k
+spotify_km <- spotify_matrix %>% kmeans(centers = 1)
+spotify_km$tot.withinss %>% unique()
+
+spotify_km <- spotify_matrix %>% kmeans(centers = 2)
+spotify_km$tot.withinss %>% unique()
+
+spotify_km <- spotify_matrix %>% kmeans(centers = 3)
+spotify_km$tot.withinss %>% unique()
+
+spotify_km <- spotify_matrix %>% kmeans(centers = 4)
+spotify_km$tot.withinss %>% unique()
+
+spotify_km <- spotify_matrix %>% kmeans(centers = 5)
+spotify_km$tot.withinss %>% unique()
+
+# using "elbow-method" to get optimal number of clusters
+spotify_matrix %>% factoextra::fviz_nbclust(kmeans, method = "wss")
+
+# using silhouettes to get optimal number of clusters
+spotify_matrix %>% factoextra::fviz_nbclust(kmeans, method = "silhouette")
+```
+
+# Interpreting the results
+```{r}
+# 4 clusters seems to be the optimum
+spotify_km <- spotify_matrix %>% kmeans(centers = 4)
+spotify <- spotify %>% mutate(cluster = spotify_km$cluster)
+
+# calculating summary stats
+spotify %>%
+  group_by(cluster) %>%
+  summarise_all(mean)
+```
+
+Possible names for the cluster-related playlists:  
+1) dance  
+2) tempo  
+3) slow  
+4) energy
